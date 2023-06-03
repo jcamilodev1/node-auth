@@ -39,6 +39,9 @@ const schemaRegister = Joi.object({
   password: Joi.string().min(6).max(1024).required(),
 })
 const bcrypt = require('bcrypt')
+
+
+
 router.post('/register', async (req, res) => {
   // validate user
   const { error } = schemaRegister.validate(req.body)
@@ -60,11 +63,13 @@ router.post('/register', async (req, res) => {
 
   try {
     const savedUser = await user.save()
-    console.log('first')
-    console.log(savedUser)
+    const token = jwt.sign({
+      name: savedUser.name,
+      id: savedUser._id
+  }, process.env.TOKEN_SECRET)
     res.json({
       error: null,
-      data: savedUser,
+      data: {token},
     })
   } catch (error) {
     res.status(400).json({ error })
